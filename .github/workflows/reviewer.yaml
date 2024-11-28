@@ -15,9 +15,14 @@ jobs:
       uses: actions/github-script@v6
       with:
         script: |
-          const reviewers = ['Navojith'];
+          const reviewersToAdd = ['Navojith'];
           const labels = context.payload.pull_request.labels.map(label => label.name.toLowerCase());
+          const currentReviewers = context.payload.pull_request.requested_reviewers.map(reviewer => reviewer.login);
+          
           if (labels.includes('frontend')) {
+            // Only add the reviewer if they aren't already in the list
+            const reviewers = [...new Set([...currentReviewers, ...reviewersToAdd])];
+
             await github.rest.pulls.requestReviewers({
               owner: context.repo.owner,
               repo: context.repo.repo,
