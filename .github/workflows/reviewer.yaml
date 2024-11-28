@@ -11,19 +11,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check for "frontend" label
-        if: contains(github.event.pull_request.labels.*.name, 'frontend') || contains(github.event.pull_request.labels.*.name, 'Frontend')
-        run: echo "Frontend label detected."
-
-      - name: Assign Navojith as a reviewer
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const reviewers = ['Navojith'];
-            const { context, github } = require("@actions/github");
+    - name: Assign Navojith as a reviewer
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const reviewers = ['Navojith'];
+          const labels = context.payload.pull_request.labels.map(label => label.name.toLowerCase());
+          if (labels.includes('frontend')) {
             await github.rest.pulls.requestReviewers({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number,
               reviewers: reviewers,
             });
+          } else {
+            console.log('No "frontend" label found; skipping reviewer assignment.');
+          }
